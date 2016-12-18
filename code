@@ -1,1 +1,83 @@
-c
+    x=np.linspace(0,1,101)
+    y=[]
+    for i in x:
+        y.append(pow(e,-1000*(i-0.3)**2))
+    return y
+def update(num):
+    y_now=init_state()
+    c=300
+    dx=0.01
+    dt=dx/c
+    r=c*dt/dx
+    x=np.linspace(0,1,101)
+    y_before=deepcopy(y_now)
+    y_after=np.zeros(101)
+    for i in range(num):
+        for j in range(101):
+            if j==0 or j==100:
+                y_after[j]=0
+            else:
+                y_after[j]=2*(1-r**2)*y_now[j]-y_before[j]+r**2*(y_now[j+1]+y_now[j-1])
+        y_before=deepcopy(y_now)
+        y_now=deepcopy(y_after)
+    return y_now
+fig=plt.figure()
+ax=fig.add_subplot(111,xlim=(0,1),ylim=(-2,2))
+line,=ax.plot([],[],'g')
+
+def init():
+    x=np.linspace(0,1,101)
+    y=[]
+    for i in x:
+        y.append(pow(e,-1000*(i-0.3)**2))
+    line.set_data(x,y)
+    return line,   
+def animate(i):
+    x=np.linspace(0,1,101)
+    y=update(i)
+    line.set_data(x,y)
+    return line,
+anima=animation.FuncAnimation(fig,animate,init_func=init,blit=False,frames=200,interval=5)
+plt.xlabel('x')
+plt.ylabel('y')
+plt.title('smooth free string')
+plt.show()
+
+def init_state():
+    x=list(np.linspace(0,1,101))
+    y=np.zeros(101)
+    for i in x:
+        y_j=pow(e,-1000*(i-0.3)**2)
+        y[i]=y_j
+    return y
+def update():
+    dx1=0.01
+    c1=300
+    dt1=dx1/c1
+    r=c1*dt1/dx1
+    y_now=init_state()
+    y_before=deepcopy(y_now)
+    y_after=np.zeros(101)
+    y_t=[y_now]
+    t=[0]
+    y_rk=[y_now[96]]
+    while t[-1]<=0.03:
+        for j in range(101):
+            if j==0 or j==100:
+                y_after[j]=0
+            else:
+                y_after[j]=2*(1-r**2)*y_now[j]-y_before[j]+r**2*(y_now[j+1]+y_now[j-1])
+            if j==96:
+                y_rk.append(y_after[j])
+        y_before=copy(y_now)
+        y_now=copy(y_after)
+        t.append(t[-1]+dt1)
+    return y_rk,t
+u=update()[0]
+t=update()[1]
+fig=plt.figure()
+plt.xlim(0,0.03)
+ax=fig.add_subplot(111)
+ax.plot(t,u,'m')
+plt.title('signal')
+plt.show()
